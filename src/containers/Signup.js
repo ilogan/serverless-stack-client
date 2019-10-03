@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Auth } from "aws-amplify";
+
 import {
   HelpBlock,
   FormGroup,
@@ -8,7 +10,7 @@ import {
 import LoaderButton from "../components/LoaderButton";
 import "./Signup.css";
 
-export default function Signup() {
+export default function Signup({ setIsAuthenticated, history }) {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,7 +32,16 @@ export default function Signup() {
     event.preventDefault();
 
     setIsLoading(true);
-    setNewUser("test");
+    try {
+      const newUser = await Auth.signUp({
+        username: email,
+        password
+      });
+      setNewUser(newUser);
+    } catch (e) {
+      alert(e.message);
+    }
+
     setIsLoading(false);
   };
 
@@ -38,6 +49,17 @@ export default function Signup() {
     event.preventDefault();
 
     setIsLoading(true);
+
+    try {
+      await Auth.confirmSignUp(email, confirmationCode);
+      await Auth.signIn(email, password);
+
+      setIsAuthenticated(true);
+      history.push("/");
+    } catch (e) {
+      alert(e.message);
+      setIsLoading(false);
+    }
   };
 
   const renderConfirmationForm = () => {
