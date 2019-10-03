@@ -20,7 +20,6 @@ export default function Login({ setIsAuthenticated, history }) {
     try {
       await Auth.signIn(email, password);
       setIsAuthenticated(true);
-      history.push("/");
     } catch (e) {
       alert(e.message);
       setIsLoading(false);
