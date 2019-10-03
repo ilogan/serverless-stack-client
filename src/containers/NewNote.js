@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { API } from "aws-amplify";
+import config from "../config";
+import { s3Upload } from "../libs/awsLib";
+
 import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import LoaderButton from "../components/LoaderButton";
-import config from "../config";
+
 import "./NewNote.css";
 
 export default function NewNote({ history }) {
@@ -33,8 +36,10 @@ export default function NewNote({ history }) {
     }
 
     setIsLoading(true);
+
     try {
-      await createNote({ content });
+      const attachment = file ? await s3Upload(file) : null;
+      await createNote({ attachment, content });
       history.push("/");
     } catch (e) {
       alert(e.message);
