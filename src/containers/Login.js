@@ -3,7 +3,7 @@ import { Auth } from "aws-amplify";
 import { Button, FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import "./Login.css";
 
-export default function Login({ setIsAuthenticated }) {
+export default function Login({ setIsAuthenticated, history }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -16,6 +16,7 @@ export default function Login({ setIsAuthenticated }) {
     try {
       await Auth.signIn(email, password);
       setIsAuthenticated(true);
+      history.push("/");
     } catch (e) {
       alert(e.message);
     }
