@@ -22,6 +22,10 @@ export default function Notes({ match, history }) {
     });
   };
 
+  const deleteNote = async () => {
+    return await API.del("notes", `/notes/${match.params.id}`);
+  };
+
   useEffect(() => {
     const getNote = async () => {
       return await API.get("notes", `/notes/${match.params.id}`);
@@ -91,6 +95,14 @@ export default function Notes({ match, history }) {
     }
 
     setIsDeleting(true);
+
+    try {
+      await deleteNote();
+      history.push("/");
+    } catch (e) {
+      alert(e.message);
+      setIsDeleting(false);
+    }
   };
 
   return (
