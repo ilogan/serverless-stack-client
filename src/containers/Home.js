@@ -7,10 +7,14 @@ import "./Home.css";
 export default function Home({ isAuthenticated }) {
   const [isLoading, setIsLoading] = useState(true);
   const [notes, setNotes] = useState([]);
-  console.log(notes);
+
+  const getNotes = async () => {
+    return await API.get("notes", "/notes");
+  };
+
   useEffect(() => {
-    const notes = async () => {
-      const notes = await API.get("notes", "/notes");
+    const setNotesFromApi = async () => {
+      const notes = await getNotes();
       setNotes(notes);
     };
 
@@ -19,7 +23,7 @@ export default function Home({ isAuthenticated }) {
     }
 
     try {
-      notes();
+      setNotesFromApi();
     } catch (e) {
       alert(e.message);
     }
