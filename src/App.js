@@ -27,12 +27,18 @@ function App() {
     checkAuthenticated();
   }, []);
 
+  const handleLogout = async event => {
+    await Auth.signOut();
+    setIsAuthenticated(false);
+  };
+
   const childProps = {
     isAuthenticated,
     setIsAuthenticated
   };
 
   return (
+    // render the screen only after determining whether or not the user is logged in or not
     !isAuthenticating && (
       <div className="App container">
         <Navbar fluid collapseOnSelect>
@@ -45,9 +51,7 @@ function App() {
           <Navbar.Collapse>
             <Nav pullRight>
               {isAuthenticated ? (
-                <NavItem onClick={e => setIsAuthenticated(false)}>
-                  Logout
-                </NavItem>
+                <NavItem onClick={handleLogout}>Logout</NavItem>
               ) : (
                 <>
                   <LinkContainer to="/signup">
