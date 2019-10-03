@@ -1,10 +1,11 @@
 import React, { useState } from "react";
+import { API } from "aws-amplify";
 import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import LoaderButton from "../components/LoaderButton";
 import config from "../config";
 import "./NewNote.css";
 
-export default function NewNote() {
+export default function NewNote({ history }) {
   const [file, setFile] = useState(null);
 
   const [isLoading, setIsLoading] = useState(null);
@@ -12,6 +13,12 @@ export default function NewNote() {
 
   const validateForm = () => {
     return content.length > 0;
+  };
+
+  const createNote = async note => {
+    return API.post("notes", "/notes", {
+      body: note
+    });
   };
 
   const handleSubmit = async event => {
@@ -26,6 +33,13 @@ export default function NewNote() {
     }
 
     setIsLoading(true);
+    try {
+      await createNote({ content });
+      history.push("/");
+    } catch (e) {
+      alert(e.message);
+      setIsLoading(false);
+    }
   };
 
   return (
