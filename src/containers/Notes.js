@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { API, Storage } from "aws-amplify";
 import config from "../config";
+import { s3Upload } from "../libs/awsLib";
 
 import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import LoaderButton from "../components/LoaderButton";
 
 import "./Notes.css";
 
-export default function Notes({ match }) {
+export default function Notes({ match, history }) {
   const [isLoading, setIsLoading] = useState(null);
   const [isDeleting, setIsDeleting] = useState(null);
   const [file, setFile] = useState(null);
@@ -15,11 +16,17 @@ export default function Notes({ match }) {
   const [content, setContent] = useState("");
   const [attachmentURL, setAttachmentURL] = useState(null);
 
-  const getNote = async () => {
-    return await API.get("notes", `/notes/${match.params.id}`);
+  const saveNote = async note => {
+    return await API.put("notes", `/notes/${match.params.id}`, {
+      body: note
+    });
   };
 
   useEffect(() => {
+    const getNote = async () => {
+      return await API.get("notes", `/notes/${match.params.id}`);
+    };
+
     const setNoteFromApi = async () => {
       let attachmentURL;
       const note = await getNote();
@@ -36,7 +43,7 @@ export default function Notes({ match }) {
       }
     };
     setNoteFromApi();
-  });
+  }, [match.params.id]);
 
   const validateForm = () => {
     return content.length > 0;
@@ -47,6 +54,7 @@ export default function Notes({ match }) {
   };
 
   const handleSubmit = async event => {
+    let attachment;
     event.preventDefault();
 
     if (file && file.size > config.MAX_ATTACHMENT_SIZE) {
@@ -58,6 +66,17 @@ export default function Notes({ match }) {
     }
 
     setIsLoading(true);
+
+    try {
+      if (file) {
+        attachment = await s3Upload(file);
+      }
+      await saveNote({ content, attachment: attachment || note.attachment });
+      history.push("/");
+    } catch (e) {
+      alert(e.message);
+      setIsLoading(false);
+    }
   };
 
   const handleDelete = async event => {
